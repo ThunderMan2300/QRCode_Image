@@ -2,6 +2,11 @@ import cv2
 import os
 import subprocess
 import numpy as np
+import pillow_jpls
+from PIL import Image
+from io import BytesIO
+import  jxlpy as jxl
+import webp
 
 def convert_to_jbig2_image(file_name, target_folder, image):
     # Convert the image to grayscale
@@ -22,11 +27,11 @@ def convert_to_jbig2_image(file_name, target_folder, image):
     subprocess.run(['jbig2enc', '-s', '-o', sym_file, temp_path])
 
     # Combine the symbol table and the page data into a single compressed .jbig2 file
-    subprocess.run(['cat', sym_file + '0001', sym_file + '.sym', '>', jbig2_path])
+    subprocess.run(['cat', sym_file + '0000', sym_file + '.sym', '>', jbig2_path])
 
     # Clean up temporary files
     os.remove(temp_path)
-    os.remove(sym_file + '0001')
+    os.remove(sym_file + '0000')
     os.remove(sym_file + '.sym')
 
 def rle_encode(image):
@@ -94,34 +99,34 @@ def covert_to_jpeg_image(file_name, target_folder, image):
     cv2.imwrite(jp2_path, image)
 
 def convert_to_lossless_webp_image(file_name, target_folder, image):
-    # Save the image temporarily in the target folder
-    temp_path = os.path.join(target_folder, file_name)
-    cv2.imwrite(temp_path, image)
-
+    
     # Convert the image to lossless WebP
     base_name, _ = os.path.splitext(file_name)
-    webp_path = os.path.join(target_folder, base_name + ".webp")
+    web_path = os.path.join(target_folder, base_name + ".webp")
     
     # Use the cwebp tool to convert the image in lossless mode
-    subprocess.run(['cwebp', '-lossless', temp_path, '-o', webp_path])
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    pil_image = Image.fromarray(rgb_image)
     
     # Remove the temporary image
-    os.remove(temp_path)
+    webp.save_image(pil_image, web_path, lossless=True)
 
 def convert_to_jpegxl_image(file_name, target_folder, image):
-    # Save the image temporarily in the target folder
-    temp_path = os.path.join(target_folder, file_name)
-    cv2.imwrite(temp_path, image)
-
-    # Convert the image to JPEG XL
     base_name, _ = os.path.splitext(file_name)
     jxl_path = os.path.join(target_folder, base_name + ".jxl")
-    
-    # Use the JPEG XL tool to convert the image (assuming 'cjxl' is the command-line tool for encoding)
-    subprocess.run(['cjxl', temp_path, jxl_path])
-    
-    # Remove the temporary image
-    os.remove(temp_path)
+
+    # Convert the OpenCV iamge to RGB format
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Use jxlpy to encode image
+    size = rgb_image.shape[:2]
+#    data = rgb_image.tobytes()
+    encoded_image = jxl.JXLPyEncoder(quality=100, colorspace='RGB', size=size, effort=9)
+    encoded_image.add_frame(rgb_image.tobytes())
+
+    with open(jxl_path, 'wb') as f:
+        f.write(encoded_image.get_output())
+
 
 def convert_to_bpg_image(file_name, target_folder, image):
     # Save the image temporarily in the target folder
@@ -147,19 +152,23 @@ def convert_to_jpegls_image(file_name, target_folder, image):
     base_name, _ = os.path.splitext(file_name)
     jpls_path = os.path.join(target_folder, base_name + ".jls")
     
-    # Use the JPEG LS tool to convert the image (assuming 'charls' is the command-line tool)
-    subprocess.run(['charls', '-i', temp_path, '-o', jpls_path])
+    img = Image.open(temp_path)
+    buffer = BytesIO()
+    img.save(buffer, "JPEG-LS")
+    
+    with open(jpls_path, 'wb') as f:
+    	f.write(buffer.getvalue())
     
     # Remove the temporary image
     os.remove(temp_path)
 
 def convert_and_save_images(file_name, target_folder, image):
     covert_to_jpeg_image(file_name, target_folder, image)
-    #convert_to_jpegls_image()          Not supported on Windows    charls
+    convert_to_jpegls_image(file_name, target_folder, image)          #Not supported on Windows    charls
     #convert_to_bpg_image()             Not supported on Windows    bpgenc
-    #convert_to_jpegxl_image()          Not supported on Windows    cjxl
-    #convert_to_lossless_webp_image()   Not supported on Windows    cwebp
-    #convert_to_jbig2_image()           Not supported on Windows    jbig2enc
+    convert_to_jpegxl_image(file_name, target_folder, image)
+    convert_to_lossless_webp_image(file_name, target_folder, image)
+    convert_to_jbig2_image(file_name, target_folder, image)
     compress_with_dpcm(file_name, target_folder, image) # Only for grayscale images
     convert_to_rle_image(file_name, target_folder, image)  # Only for grayscale images
 
@@ -181,6 +190,7 @@ def load_and_save_image(source_folder, target_folder, file_name):
 def display_image_sizes(target_folder):
     # Display the header
     header = "Image Name".ljust(20) + "Extension".ljust(15) + "Size (bytes)"
+
     print(header)
     print('-' * len(header))
     
