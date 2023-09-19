@@ -1,0 +1,54 @@
+not found
+not found
+not found
+Image Name          Extension      Size (bytes)
+-----------------------------------------------
+id_sample           .jls           159037
+id_sample           .webp          129684
+chunked_image       .jls           27545
+noise_image_bk      .jls           206611
+id_sample_bk_rle    .txt           35412
+id_sample_rle       .txt           414566
+id_sample_bk        .jxl           6104
+id_sample                          3226
+id_sample           .jxl           145902
+id_sample           .flif          188362
+noise_image         .webp          921680
+noise_image_bk                     39027
+noise_image_bk      .jp2           229669
+id_sample_dpcm      .png           65014
+id_sample           .jp2           59289
+chunked_image_bk_rle.txt           46981
+noise_image_bk      .webp          38460
+chunked_image_dpcm  .png           44308
+noise_image         .jls           980491
+id_sample_bk_dpcm   .png           7309
+chunked_image                      554
+temp                .png           70259
+chunked_image       .jxl           15404
+chunked_image       .webp          3232
+id_sample_bk                       3226
+noise_image_bk      .jxl           38536
+id_sample_bk        .jls           9337
+chunked_image_bk    .webp          360
+output              .0000          512
+chunked_image_bk    .jls           11935
+id_sample_bk        .jp2           59239
+noise_image_rle     .txt           1737051
+chunked_image       .jp2           117692
+id_sample_bk        .webp          2952
+chunked_image_rle   .txt           101927
+noise_image                        39027
+chunked_image_bk    .jp2           92446
+noise_image         .jxl           921727
+noise_image_dpcm    .png           307686
+chunked_image_bk                   554
+noise_image         .flif          923786
+chunked_image_bk    .jxl           4716
+chunked_image       .flif          6238
+noise_image         .jp2           229981
+output              .sym           1737
+noise_image_bk_rle  .txt           768371
+id_sample           .jbig2         3226
+chunked_image_bk_dpcm.png           13285
+noise_image_bk_dpcm .png           83870

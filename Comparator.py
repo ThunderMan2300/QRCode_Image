@@ -21,18 +21,25 @@ def convert_to_jbig2_image(file_name, target_folder, image):
 
     base_name, _ = os.path.splitext(file_name)
     jbig2_path = os.path.join(target_folder, base_name + ".jbig2")
-    sym_file = os.path.join(target_folder, base_name + "_sym")
+    sym_file = os.path.join(target_folder, base_name)
 
     # Use jbig2enc to encode the image
-    subprocess.run(['jbig2enc', '-s', '-o', sym_file, temp_path])
+    result = subprocess.run(['jbig2enc', '-s', '-S', '-p', '-v', '-O', sym_file, temp_path])
+
+    if os.path.exists(sym_file + '.sym') and op.path.exists(sym_file + '.0000'):
+        with open(jbig2_path, 'wb') as out_file:
+            with open(sym_file + '.0000', 'rb') as f1, open(sym_file + '.sym', 'rb') as f2:
+                out_file.write(f1.read())
+                out_file.write(f2.read())
+
+        os.remove(temp_path)
+        os.remove(sym_file + '.0000')
+        os.remove(sym_file + '.sym')
+    else:
+        print("not found")
 
     # Combine the symbol table and the page data into a single compressed .jbig2 file
-    subprocess.run(['cat', sym_file + '0000', sym_file + '.sym', '>', jbig2_path])
-
-    # Clean up temporary files
-    os.remove(temp_path)
-    os.remove(sym_file + '0000')
-    os.remove(sym_file + '.sym')
+    # subprocess.run(['cat', sym_file + '0001', sym_file + '.sym', '>', jbig2_path])
 
 def rle_encode(image):
     # Convert image to grayscale
@@ -210,7 +217,7 @@ if __name__ == "__main__":
     target_folder = "results"
     
     # List of image names
-    image_names = ["chunked_image.png", "id_sample.png", "noise_image.png"]
+    image_names = ["chunked_image_bk.png", "id_sample_bk.png", "noise_image_bk.png"]
 
     
     # Load and save each image
